@@ -19,10 +19,11 @@ import { usingSheets, writeValidacionToSheets } from "./sheets";
  *      es terminal (Approved/Declined/…), escribe la fila en "Validacion Didit".
  *
  * Variables de entorno (ver .env.example):
- *   DIDIT_API_KEY      -> API key secreta (cabecera x-api-key)
- *   DIDIT_WORKFLOW_ID  -> id del workflow de verificación configurado en Didit
- *   DIDIT_BASE_URL     -> opcional (por defecto https://verification.didit.me)
- *   APP_BASE_URL       -> opcional (por defecto http://localhost:8080)
+ *   DIDIT_API_KEY          -> API key secreta (cabecera x-api-key)
+ *   DIDIT_KYC_WORKFLOW_ID  -> id del workflow de verificación (KYC) en Didit
+ *                             (alternativa: DIDIT_WORKFLOW_ID)
+ *   DIDIT_BASE_URL         -> opcional (por defecto https://verification.didit.me)
+ *   APP_BASE_URL           -> opcional (por defecto http://localhost:8080)
  */
 
 const VALIDACION_SHEET = "Validacion Didit";
@@ -38,10 +39,13 @@ function appBase(): string {
 
 function requireDiditConfig(): { apiKey: string; workflowId: string } {
   const apiKey = process.env.DIDIT_API_KEY;
-  const workflowId = process.env.DIDIT_WORKFLOW_ID;
+  // Workflow de KYC. Acepta DIDIT_KYC_WORKFLOW_ID (nombre en Vercel) y, como
+  // alternativa, el nombre genérico DIDIT_WORKFLOW_ID.
+  const workflowId =
+    process.env.DIDIT_KYC_WORKFLOW_ID || process.env.DIDIT_WORKFLOW_ID;
   if (!apiKey || !workflowId) {
     throw new Error(
-      "Didit no está configurado (faltan DIDIT_API_KEY / DIDIT_WORKFLOW_ID en .env).",
+      "Didit no está configurado (faltan DIDIT_API_KEY / DIDIT_KYC_WORKFLOW_ID en .env).",
     );
   }
   return { apiKey, workflowId };
