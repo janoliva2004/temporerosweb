@@ -70,6 +70,18 @@ export function PurchaseDialog({
       return;
     }
 
+    // Datos de portabilidad (solo si el cliente quiere conservar su número).
+    const portaNumero =
+      portability === "yes" ? String(fd.get("portaNumero") ?? "").trim() : "";
+    const portaOperador =
+      portability === "yes" ? String(fd.get("portaOperador") ?? "").trim() : "";
+    if (portability === "yes" && (!portaNumero || !portaOperador)) {
+      toast.error("Faltan datos de portabilidad", {
+        description: "Indica tu número actual y tu operador actual.",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const { url } = await createCheckoutSession({
@@ -80,6 +92,8 @@ export function PurchaseDialog({
           simType,
           icc: simType === "sim" ? String(fd.get("icc") ?? "").trim() : "",
           portability,
+          portaNumero,
+          portaOperador,
           months,
           planId: plan.id,
           planCode: plan.code,
@@ -190,6 +204,31 @@ export function PurchaseDialog({
                 <span>Sí, ya tengo un número y quiero <strong>cambiarme a Connectivity</strong> (portabilidad).</span>
               </label>
             </RadioGroup>
+
+            {portability === "yes" && (
+              <div className="mt-1 grid gap-3 rounded-xl border border-[color:var(--color-brand-orange)]/30 bg-[color:var(--color-brand-orange)]/5 p-3">
+                <div className="grid gap-2">
+                  <Label htmlFor="portaNumero">Tu número de teléfono actual</Label>
+                  <Input
+                    id="portaNumero"
+                    name="portaNumero"
+                    type="tel"
+                    inputMode="numeric"
+                    placeholder="600 123 456"
+                    required
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="portaOperador">Tu operador actual</Label>
+                  <Input
+                    id="portaOperador"
+                    name="portaOperador"
+                    placeholder="Movistar, Vodafone, Orange…"
+                    required
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Meses de prepago */}

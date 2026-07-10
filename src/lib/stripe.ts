@@ -64,6 +64,8 @@ const OrderSchema = z.object({
   simType: z.enum(["sim", "esim"]),
   icc: z.string().trim().max(40).optional().default(""),
   portability: z.enum(["no", "yes"]).default("no"),
+  portaNumero: z.string().trim().max(40).optional().default(""),
+  portaOperador: z.string().trim().max(60).optional().default(""),
   months: z.number().int().min(1).max(12),
   planId: z.enum(["p80", "p150"]),
   planCode: z.string().trim().min(1).max(40),
@@ -94,6 +96,8 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
       "metadata[simType]": data.simType,
       "metadata[icc]": data.icc,
       "metadata[portability]": data.portability,
+      "metadata[portaNumero]": data.portaNumero,
+      "metadata[portaOperador]": data.portaOperador,
       "metadata[months]": String(data.months),
       "metadata[planCode]": data.planCode,
       "metadata[planGb]": String(data.planGb),
@@ -112,6 +116,8 @@ type SessionMeta = {
   simType?: string;
   icc?: string;
   portability?: string;
+  portaNumero?: string;
+  portaOperador?: string;
   months?: string;
   planCode?: string;
   planGb?: string;
@@ -167,6 +173,8 @@ export const verifyCheckout = createServerFn({ method: "POST" })
       m.simType === "sim" ? m.icc || "" : "",   // L  ICC (SIM física)
       m.phone || "",                            // M  Phone
       m.planCode || "",                         // N  Plan Code
+      m.portability === "yes" ? m.portaNumero || "" : "",   // O  ICC PORTA (número actual)
+      m.portability === "yes" ? m.portaOperador || "" : "", // P  OPERADOR (operador actual)
     ];
 
     const formRow = await appendOrderToSheets(orderId, row);

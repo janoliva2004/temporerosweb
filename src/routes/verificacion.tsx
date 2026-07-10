@@ -109,16 +109,16 @@ function Verificacion() {
         {state === "approved" && (
           <>
             <CheckCircle2 className="mx-auto h-12 w-12 text-green-600" />
-            <h1 className="mt-5 font-display text-2xl font-bold">¡Identidad verificada!</h1>
+            <h1 className="mt-5 font-display text-2xl font-bold">VERIFICACIÓN APROBADA</h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              Todo correcto. Procederemos a activar tu línea.
+              Revisa tu correo para ver los detalles del pedido.
             </p>
             <div className="mt-6">
               <Link
                 to="/"
-                className="inline-flex items-center justify-center rounded-full bg-[image:var(--gradient-brand)] px-5 py-2 text-sm font-semibold text-white shadow-[var(--shadow-brand)] hover:opacity-95"
+                className="inline-flex items-center justify-center rounded-full bg-[image:var(--gradient-brand)] px-6 py-2.5 text-sm font-semibold text-white shadow-[var(--shadow-brand)] hover:opacity-95"
               >
-                Volver al inicio
+                Continuar
               </Link>
             </div>
           </>
