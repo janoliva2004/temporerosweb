@@ -124,16 +124,30 @@ type SessionMeta = {
   price?: string;
 };
 
+// Descompone una fecha en la zona horaria de Madrid (ajusta verano/invierno solo).
+function madridParts(d: Date): Record<string, string> {
+  const fmt = new Intl.DateTimeFormat("es-ES", {
+    timeZone: "Europe/Madrid",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23",
+  });
+  const out: Record<string, string> = {};
+  for (const part of fmt.formatToParts(d)) out[part.type] = part.value;
+  return out;
+}
+
 function ts(d: Date): string {
-  const p = (n: number) => String(n).padStart(2, "0");
-  return (
-    `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ` +
-    `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`
-  );
+  const p = madridParts(d);
+  return `${p.year}-${p.month}-${p.day} ${p.hour}:${p.minute}:${p.second}`;
 }
 function ymd(d: Date): string {
-  const p = (n: number) => String(n).padStart(2, "0");
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+  const p = madridParts(d);
+  return `${p.year}-${p.month}-${p.day}`;
 }
 
 /** 2) Verifica el pago y, SOLO si está pagado, crea la fila en el Sheet. */
