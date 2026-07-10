@@ -65,7 +65,9 @@ export const startVerification = createServerFn({ method: "POST" })
       body: JSON.stringify({
         workflow_id: workflowId,
         vendor_data: String(data.formRow), // referencia a la fila del formulario
-        callback: `${appBase()}/verificacion`, // a dónde vuelve el cliente
+        // Llevamos form_row en la URL de retorno: así, aunque el móvil pierda el
+        // almacenamiento del navegador al volver de Didit, seguimos sabiendo la fila.
+        callback: `${appBase()}/verificacion?form_row=${data.formRow}`,
       }),
     });
 

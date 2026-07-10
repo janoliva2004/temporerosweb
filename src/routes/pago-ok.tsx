@@ -51,8 +51,10 @@ function PagoOk() {
     setStarting(true);
     try {
       const { url, sessionId } = await startVerification({ data: { formRow } });
-      sessionStorage.setItem("didit_session_id", sessionId);
-      sessionStorage.setItem("didit_form_row", String(formRow));
+      // localStorage (no sessionStorage): sobrevive al volver de Didit en móvil,
+      // aunque el retorno abra otra pestaña/contexto del navegador.
+      localStorage.setItem("didit_session_id", sessionId);
+      localStorage.setItem("didit_form_row", String(formRow));
       window.location.href = url;
     } catch (e) {
       setMessage(e instanceof Error ? e.message : "No se pudo iniciar la verificación.");

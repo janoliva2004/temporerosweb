@@ -21,8 +21,16 @@ function Verificacion() {
     if (started.current) return;
     started.current = true;
 
-    const sessionId = sessionStorage.getItem("didit_session_id");
-    const row = Number(sessionStorage.getItem("didit_form_row") || "0");
+    // Preferimos los parámetros de la URL (sobreviven al retorno de Didit en móvil)
+    // y usamos localStorage como respaldo.
+    const params = new URLSearchParams(window.location.search);
+    const sessionId =
+      params.get("session_id") ||
+      params.get("sessionId") ||
+      localStorage.getItem("didit_session_id");
+    const row = Number(
+      params.get("form_row") || localStorage.getItem("didit_form_row") || "0",
+    );
     setFormRow(row);
 
     if (!sessionId || !row) {
@@ -43,7 +51,7 @@ function Verificacion() {
         setStatus(r.status);
         if (r.done) {
           // La sesión ya se consumió; limpiamos el id (dejamos formRow para reintentar).
-          sessionStorage.removeItem("didit_session_id");
+          localStorage.removeItem("didit_session_id");
           setState(r.status === "Approved" ? "approved" : "rejected");
           return;
         }
@@ -68,13 +76,13 @@ function Verificacion() {
 
   // Inicia una nueva verificación para el mismo pedido y redirige a Didit.
   async function handleRetry() {
-    const row = formRow || Number(sessionStorage.getItem("didit_form_row") || "0");
+    const row = formRow || Number(localStorage.getItem("didit_form_row") || "0");
     if (!row) return;
     setRetrying(true);
     try {
       const { url, sessionId } = await startVerification({ data: { formRow: row } });
-      sessionStorage.setItem("didit_session_id", sessionId);
-      sessionStorage.setItem("didit_form_row", String(row));
+      localStorage.setItem("didit_session_id", sessionId);
+      localStorage.setItem("didit_form_row", String(row));
       window.location.href = url;
     } catch (e) {
       setRetrying(false);
