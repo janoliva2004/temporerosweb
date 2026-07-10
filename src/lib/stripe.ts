@@ -87,6 +87,8 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
       "line_items[0][quantity]": String(data.months),
       allow_promotion_codes: "true",
       customer_email: data.email,
+      // Recibo por email al cliente (en modo live). Refuerza el ajuste del panel.
+      "payment_intent_data[receipt_email]": data.email,
       success_url: `${appBase()}/pago-ok?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appBase()}/?pago=cancelado`,
       // Todos los datos del pedido viajan en metadata; se escriben tras el pago.
