@@ -72,6 +72,7 @@ const OrderSchema = z.object({
   planGb: z.number().int().positive(),
   planName: z.string().trim().min(1).max(80),
   price: z.number().positive(),
+  stripeProduct: z.string().trim().max(60).optional().default(""),
 });
 
 /** 1) Crea la sesión de Checkout (pago único = precio × meses). */
@@ -79,11 +80,22 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
   .validator((input: unknown) => OrderSchema.parse(input))
   .handler(async ({ data }) => {
     const amount = Math.round(data.price * 100); // céntimos, por mes
+
+    // Si hay un producto real de Stripe y la clave es LIVE, enlazamos el pedido
+    // a ese producto: así el checkout muestra su nombre real y los cupones
+    // limitados a ese producto se aplican. En test (o sin producto) usamos un
+    // nombre al vuelo para no romper (los IDs de producto son de modo live).
+    const isLiveKey = requireStripeKey().startsWith("sk_live_");
+    const productParam: Record<string, string> =
+      isLiveKey && data.stripeProduct
+        ? { "line_items[0][price_data][product]": data.stripeProduct }
+        : { "line_items[0][price_data][product_data][name]": `${data.planName} — prepago` };
+
     const session = await stripe("/checkout/sessions", "POST", {
       mode: "payment",
       "line_items[0][price_data][currency]": "eur",
       "line_items[0][price_data][unit_amount]": String(amount),
-      "line_items[0][price_data][product_data][name]": `${data.planName} — prepago`,
+      ...productParam,
       "line_items[0][quantity]": String(data.months),
       allow_promotion_codes: "true",
       customer_email: data.email,

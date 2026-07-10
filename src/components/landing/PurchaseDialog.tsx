@@ -100,6 +100,7 @@ export function PurchaseDialog({
           planGb: plan.gb,
           planName: plan.name,
           price: plan.price,
+          stripeProduct: plan.stripeProduct ?? "",
         },
       });
       window.location.href = url; // a Stripe Checkout
