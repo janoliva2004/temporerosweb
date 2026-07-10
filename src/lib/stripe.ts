@@ -137,7 +137,10 @@ export const verifyCheckout = createServerFn({ method: "POST" })
     const session = await stripe(`/checkout/sessions/${data.sessionId}`, "GET");
 
     const paid = session.payment_status === "paid" || session.status === "complete";
-    const customerId = (session.customer as string | null) ?? "";
+    // En modo "payment" sin customer_creation, session.customer suele ser null;
+    // usamos payment_intent (siempre presente si el pago se completó) como ID Stripe.
+    const stripeId =
+      (session.payment_intent as string | null) ?? (session.id as string | null) ?? "";
     const m = (session.metadata as SessionMeta | null) ?? {};
 
     if (!paid) return { paid: false as const, formRow: 0 };
@@ -168,7 +171,7 @@ export const verifyCheckout = createServerFn({ method: "POST" })
 
     const formRow = await appendOrderToSheets(orderId, row);
     // ID Stripe -> Validacion Didit (col A) enlazado a la fila del formulario.
-    await writePagoToSheets(formRow, customerId, ymd(now));
+    await writePagoToSheets(formRow, stripeId, ymd(now));
 
     return { paid: true as const, formRow };
   });
