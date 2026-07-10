@@ -21,11 +21,12 @@ function Privacidad() {
           <section>
             <h2 className="font-display text-lg font-bold">1. Responsable del tratamiento</h2>
             <ul className="list-disc pl-5">
-              <li><strong>Responsable:</strong> Connectivity <em>[razón social / CIF pendiente de completar]</em></li>
-              <li><strong>Domicilio:</strong> <em>[dirección fiscal pendiente de completar]</em>, España</li>
+              <li><strong>Responsable:</strong> Connectivity World Global, S.L.U.</li>
+              <li><strong>CIF:</strong> B66347634</li>
+              <li><strong>Domicilio:</strong> Calle del Císter, 45, 08022 Barcelona, España</li>
               <li>
                 <strong>Contacto:</strong>{" "}
-                <a href="mailto:jan@connectivityglobal.com" className="underline">jan@connectivityglobal.com</a>
+                <a href="mailto:info@connectivityglobal.com" className="underline">info@connectivityglobal.com</a>
               </li>
             </ul>
           </section>
@@ -86,7 +87,7 @@ function Privacidad() {
             <p>
               Puedes ejercer tus derechos de acceso, rectificación, supresión, oposición, limitación y
               portabilidad escribiendo a{" "}
-              <a href="mailto:jan@connectivityglobal.com" className="underline">jan@connectivityglobal.com</a>.
+              <a href="mailto:info@connectivityglobal.com" className="underline">info@connectivityglobal.com</a>.
               También puedes reclamar ante la Agencia Española de Protección de Datos (www.aepd.es) si
               consideras que no hemos tratado tus datos correctamente.
             </p>

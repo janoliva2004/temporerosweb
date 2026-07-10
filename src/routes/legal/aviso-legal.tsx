@@ -26,11 +26,12 @@ function AvisoLegal() {
               (LSSI-CE), se informa a los usuarios de que el titular de este sitio web es:
             </p>
             <ul className="list-disc pl-5">
-              <li><strong>Titular:</strong> Connectivity <em>[razón social / CIF pendiente de completar]</em></li>
-              <li><strong>Domicilio:</strong> <em>[dirección fiscal pendiente de completar]</em>, España</li>
+              <li><strong>Titular:</strong> Connectivity World Global, S.L.U.</li>
+              <li><strong>CIF:</strong> B66347634</li>
+              <li><strong>Domicilio:</strong> Calle del Císter, 45, 08022 Barcelona, España</li>
               <li>
                 <strong>Correo electrónico:</strong>{" "}
-                <a href="mailto:jan@connectivityglobal.com" className="underline">jan@connectivityglobal.com</a>
+                <a href="mailto:info@connectivityglobal.com" className="underline">info@connectivityglobal.com</a>
               </li>
               <li><strong>Teléfono / WhatsApp:</strong> +34 633 39 10 47</li>
             </ul>
