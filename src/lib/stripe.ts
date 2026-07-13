@@ -72,7 +72,15 @@ const OrderSchema = z.object({
   planGb: z.number().int().positive(),
   planName: z.string().trim().min(1).max(80),
   price: z.number().positive(),
-  stripeProduct: z.string().trim().max(60).optional().default(""),
+  // IDs de producto de Stripe por modo (test / live). El servidor elige según
+  // la clave. Enlazar el producto real hace que los cupones limitados a ese
+  // producto se apliquen en el checkout.
+  stripeProduct: z
+    .object({
+      test: z.string().trim().max(60).optional(),
+      live: z.string().trim().max(60).optional(),
+    })
+    .optional(),
 });
 
 /** 1) Crea la sesión de Checkout (pago único = precio × meses). */
@@ -81,15 +89,18 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const amount = Math.round(data.price * 100); // céntimos, por mes
 
-    // Si hay un producto real de Stripe y la clave es LIVE, enlazamos el pedido
-    // a ese producto: así el checkout muestra su nombre real y los cupones
-    // limitados a ese producto se aplican. En test (o sin producto) usamos un
-    // nombre al vuelo para no romper (los IDs de producto son de modo live).
+    // Enlazamos el pedido al producto real de Stripe del modo actual (test o
+    // live). Así el checkout muestra el nombre real del producto y los cupones
+    // limitados a ese producto se aplican. Si no hay ID para este modo, usamos
+    // un nombre al vuelo para no romper (funciona, pero sin restricción de
+    // cupón por producto).
     const isLiveKey = requireStripeKey().startsWith("sk_live_");
-    const productParam: Record<string, string> =
-      isLiveKey && data.stripeProduct
-        ? { "line_items[0][price_data][product]": data.stripeProduct }
-        : { "line_items[0][price_data][product_data][name]": `${data.planName} — prepago` };
+    const productId = isLiveKey
+      ? data.stripeProduct?.live
+      : data.stripeProduct?.test;
+    const productParam: Record<string, string> = productId
+      ? { "line_items[0][price_data][product]": productId }
+      : { "line_items[0][price_data][product_data][name]": `${data.planName} — prepago` };
 
     const session = await stripe("/checkout/sessions", "POST", {
       mode: "payment",

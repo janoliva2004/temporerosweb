@@ -1,6 +1,15 @@
 export type PlanId = "intl80" | "intl150" | "nac60" | "nac150";
 export type FamilyId = "intl" | "nac";
 
+/**
+ * IDs de producto de Stripe por modo. Los productos de test y de live son
+ * distintos en Stripe, así que guardamos ambos y el servidor elige según la
+ * clave (sk_test_ / sk_live_). Si el checkout se enlaza al producto real, el
+ * nombre correcto se muestra en Stripe y los cupones limitados a ese producto
+ * sí se aplican.
+ */
+export type StripeProductIds = { test?: string; live?: string };
+
 export type Plan = {
   id: PlanId;
   /** Familia a la que pertenece la variante (Internacional / Nacional). */
@@ -15,11 +24,7 @@ export type Plan = {
   intlMin: number;
   /** Si incluye el bono de llamadas internacionales. */
   international: boolean;
-  /**
-   * ID del producto de Stripe (modo LIVE). Si se usa, el checkout muestra el
-   * nombre real del producto y los cupones limitados a él sí se aplican.
-   */
-  stripeProduct?: string;
+  stripeProduct?: StripeProductIds;
 };
 
 /**
@@ -30,9 +35,9 @@ export const PLANS: Plan[] = [
   {
     id: "intl80",
     familyId: "intl",
-    code: "CONN80",
-    name: "Connectivity 80",
-    stripeProduct: "prod_UqbYtVGLaRAEo8",
+    code: "FLEXI80",
+    name: "FLEXISIM 80GB",
+    stripeProduct: { test: "prod_UsPrOGHUVpjf2l", live: "prod_UqbYtVGLaRAEo8" },
     gb: 80,
     price: 11.95,
     priceLabel: "11,95 €",
@@ -42,9 +47,9 @@ export const PLANS: Plan[] = [
   {
     id: "intl150",
     familyId: "intl",
-    code: "CONN150",
-    name: "Connectivity 150",
-    stripeProduct: "prod_UqtOZTtoJIf9s7",
+    code: "FLEXI150",
+    name: "FLEXISIM 150GB",
+    stripeProduct: { test: "prod_UsPr20LmGTAIL2", live: "prod_UqtOZTtoJIf9s7" },
     gb: 150,
     price: 14.95,
     priceLabel: "14,95 €",
@@ -54,8 +59,9 @@ export const PLANS: Plan[] = [
   {
     id: "nac60",
     familyId: "nac",
-    code: "CONN60N",
-    name: "Connectivity Nacional 60",
+    code: "FLEXI60N",
+    name: "FLEXISIM NACIONAL 60GB",
+    stripeProduct: { test: "prod_UsPrx6NVOj4wYr", live: "prod_UsPkNh2LYxzR5v" },
     gb: 60,
     price: 8.5,
     priceLabel: "8,50 €",
@@ -65,8 +71,9 @@ export const PLANS: Plan[] = [
   {
     id: "nac150",
     familyId: "nac",
-    code: "CONN150N",
-    name: "Connectivity Nacional 150",
+    code: "FLEXI150N",
+    name: "FLEXISIM NACIONAL 150GB",
+    stripeProduct: { test: "prod_UsPrsmyk2kawMk", live: "prod_UsPlm3iHjiIzVB" },
     gb: 150,
     price: 11.35,
     priceLabel: "11,35 €",
