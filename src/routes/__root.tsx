@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { CookieBanner } from "../components/landing/CookieBanner";
+import { LanguageProvider } from "../lib/i18n";
 import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
@@ -99,9 +100,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Connectivity — SIMs prepago 5G con gigas acumulables" },
-      { name: "description", content: "Prepaid Plans Pro is a web application for showcasing and selling prepaid SIM card plans." },
-      { property: "og:description", content: "Prepaid Plans Pro is a web application for showcasing and selling prepaid SIM card plans." },
-      { name: "twitter:description", content: "Prepaid Plans Pro is a web application for showcasing and selling prepaid SIM card plans." },
+      {
+        name: "twitter:description",
+        content:
+          "80 GB o 150 GB acumulables, llamadas ilimitadas y 1.000 min internacionales. Sin permanencia.",
+      },
       { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/BZD29WqjCvVQfn6G2uLPlib2mC22/social-images/social-1782978117413-logo-connectivity.webp" },
       { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/BZD29WqjCvVQfn6G2uLPlib2mC22/social-images/social-1782978117413-logo-connectivity.webp" },
     ],
@@ -110,7 +113,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
+      { rel: "apple-touch-icon", href: "/logo-connectivity.png" },
     ],
   }),
   shellComponent: RootShell,
@@ -138,9 +142,11 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
-      <CookieBanner />
+      <LanguageProvider>
+        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+        <Outlet />
+        <CookieBanner />
+      </LanguageProvider>
     </QueryClientProvider>
   );
 }

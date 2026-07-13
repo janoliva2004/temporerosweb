@@ -10,20 +10,22 @@ import {
 import { PLANS, type Plan } from "./plans";
 import { COUNTRIES } from "./countries-data";
 import { Check, Globe2, X } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
 export function PlansSection({ onBuy }: { onBuy: (plan: Plan) => void }) {
+  const { t } = useI18n();
   return (
     <section id="planes" className="bg-[color:var(--color-brand-orange)]/[0.05] py-24">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
         <div className="mx-auto max-w-2xl text-center">
           <span className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-brand-orange)]/30 bg-white px-4 py-1.5 text-sm font-semibold text-[color:var(--color-brand-orange)] shadow-sm">
-            Elige y activa hoy
+            {t.plans.badge}
           </span>
           <h2 className="mt-5 font-display text-4xl font-bold tracking-tight sm:text-5xl">
-            2 súper planes con llamadas a tu país y gigas acumulables!
+            {t.plans.title}
           </h2>
           <p className="mt-4 text-lg text-muted-foreground">
-            Selecciona tu plan. La compra y la activación online empiezan aquí.
+            {t.plans.subtitle}
           </p>
         </div>
 
@@ -39,6 +41,8 @@ export function PlansSection({ onBuy }: { onBuy: (plan: Plan) => void }) {
 }
 
 function PlanRow({ plan, onBuy }: { plan: Plan; onBuy: () => void }) {
+  const { t } = useI18n();
+  const features = t.plans.features[plan.id];
   return (
     <div
       role="button"
@@ -59,25 +63,25 @@ function PlanRow({ plan, onBuy }: { plan: Plan; onBuy: () => void }) {
         >
           {plan.priceLabel.replace(" €", "")}
         </span>
-        <span className="text-lg font-semibold text-foreground/70">€/mes</span>
+        <span className="text-lg font-semibold text-foreground/70">{t.plans.perMonth}</span>
       </div>
 
       <div className="md:min-w-[170px] md:border-l md:border-border md:pl-10">
-        <p className="text-sm uppercase tracking-wider text-muted-foreground">Móvil</p>
+        <p className="text-sm uppercase tracking-wider text-muted-foreground">{t.plans.mobile}</p>
         <p className="font-display text-3xl font-bold text-foreground">
           {plan.gb} <span className="text-xl font-semibold text-foreground/70">GB</span>
         </p>
       </div>
 
       <ul className="space-y-2 text-sm text-foreground/80 md:pl-4">
-        {plan.features.map((f) => (
-          <li key={f} className="flex items-start gap-2">
+        {features.map((f) => (
+          <li key={f.text} className="flex items-start gap-2">
             <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[color:var(--color-brand-orange)]" />
-            {f.toLowerCase().includes("países") ? (
+            {f.kind === "countries" ? (
               <CountriesFeature />
             ) : (
-              <span className={f.toLowerCase().includes("acumulables") ? "font-bold text-foreground" : ""}>
-                {f}
+              <span className={f.kind === "bold" ? "font-bold text-foreground" : ""}>
+                {f.text}
               </span>
             )}
           </li>
@@ -93,7 +97,7 @@ function PlanRow({ plan, onBuy }: { plan: Plan; onBuy: () => void }) {
           size="lg"
           className="h-14 w-full rounded-full bg-[image:var(--gradient-brand)] text-base font-semibold text-white shadow-[var(--shadow-brand)] transition-transform group-hover:scale-[1.02] hover:opacity-95"
         >
-          Comprar y activar
+          {t.plans.buy}
         </Button>
       </div>
     </div>
@@ -101,6 +105,7 @@ function PlanRow({ plan, onBuy }: { plan: Plan; onBuy: () => void }) {
 }
 
 function CountriesFeature() {
+  const { t } = useI18n();
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -108,10 +113,10 @@ function CountriesFeature() {
           type="button"
           onClick={(e) => e.stopPropagation()}
           className="inline-flex w-full cursor-pointer items-center gap-2 text-left font-medium text-foreground underline decoration-[color:var(--color-brand-orange)]/50 underline-offset-4 transition-colors hover:text-[color:var(--color-brand-orange)] hover:decoration-[color:var(--color-brand-orange)] sm:w-auto"
-          aria-label="Ver países disponibles para llamadas internacionales"
+          aria-label={t.plans.intlAria}
         >
           <Globe2 className="h-4 w-4 text-[color:var(--color-brand-orange)]" aria-hidden />
-          1.000 min a países (fijo y móvil)
+          {t.plans.intl}
         </button>
       </DialogTrigger>
 
@@ -122,19 +127,19 @@ function CountriesFeature() {
       >
         <DialogHeader className="border-b border-border bg-[color:var(--color-brand-orange)]/[0.06] px-6 py-5 text-left sm:px-8">
           <DialogTitle className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
-            Países incluidos en el bono internacional
+            {t.plans.dialog.title}
           </DialogTitle>
           <DialogDescription className="mt-2 text-base leading-relaxed text-foreground/70">
-            1.000 minutos a destinos internacionales.&nbsp;
+            {t.plans.dialog.desc}&nbsp;
           </DialogDescription>
         </DialogHeader>
 
         <div className="px-4 pb-5 pt-4 sm:px-8 sm:pb-8">
           <div className="overflow-hidden rounded-2xl border border-border bg-background shadow-sm">
             <div className="grid grid-cols-[minmax(0,1fr)_92px_92px] items-center gap-2 border-b border-border bg-muted/50 px-4 py-4 text-sm font-extrabold uppercase text-foreground/75 sm:grid-cols-[minmax(220px,1fr)_130px_130px] sm:px-6 sm:text-base">
-              <span>País</span>
-              <span className="text-center">Fijo</span>
-              <span className="text-center">Móvil</span>
+              <span>{t.plans.dialog.country}</span>
+              <span className="text-center">{t.plans.dialog.fijo}</span>
+              <span className="text-center">{t.plans.dialog.movil}</span>
             </div>
 
             <ul className="max-h-[58vh] divide-y divide-border/60 overflow-y-auto">

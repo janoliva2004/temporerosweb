@@ -1,41 +1,9 @@
 import { Smartphone, Store, ScanFace } from "lucide-react";
+import { useI18n } from "@/lib/i18n";
 
-const VERIFY_HINT =
-  "La verificación se hace 100% online con tu cámara, sin necesidad de desplazarte a ninguna tienda.";
+type Step = { title: string; text: string; hint?: string };
 
-const esimSteps = [
-  {
-    title: "Elige tu plan",
-    text: "80 GB o 150 GB. Sin permanencia y mismo precio para SIM y eSIM.",
-  },
-  {
-    title: "Rellena tus datos y verifica tu identidad",
-    text: "Escanea tu documento y haz un selfie.",
-    hint: VERIFY_HINT,
-  },
-  {
-    title: "Empieza a navegar",
-    text: "Recibes tu eSIM al instante: escaneas el QR y ya estás conectado en 5G.",
-  },
-];
-
-const simSteps = [
-  {
-    title: "Encuentra un partner y elige tu plan",
-    text: "Acude a un partner de Connectivity y elige 80 GB o 150 GB.",
-  },
-  {
-    title: "Rellena tus datos y verifica tu identidad",
-    text: "Escanea tu documento y haz un selfie.",
-    hint: VERIFY_HINT,
-  },
-  {
-    title: "Activa tu SIM con el ICC y empieza a navegar",
-    text: "Introduce el número de ICC de tu SIM física y quedará lista para usar.",
-  },
-];
-
-function StepList({ steps }: { steps: typeof esimSteps }) {
+function StepList({ steps, hint }: { steps: Step[]; hint: string }) {
   return (
     <ol className="mt-6 space-y-5">
       {steps.map((s, i) => (
@@ -47,7 +15,7 @@ function StepList({ steps }: { steps: typeof esimSteps }) {
             <p className="font-semibold text-foreground">{s.title}</p>
             <p className="mt-0.5 text-sm text-muted-foreground">{s.text}</p>
             {s.hint ? (
-              <p className="mt-1 text-xs text-muted-foreground/80">{s.hint}</p>
+              <p className="mt-1 text-xs text-muted-foreground/80">{hint}</p>
             ) : null}
           </div>
         </li>
@@ -57,14 +25,15 @@ function StepList({ steps }: { steps: typeof esimSteps }) {
 }
 
 export function HowItWorks() {
+  const { t } = useI18n();
   return (
     <section id="como-funciona" className="mx-auto max-w-6xl px-4 py-24 sm:px-6">
       <div className="mx-auto max-w-2xl text-center">
         <p className="text-sm font-semibold uppercase tracking-wider text-[color:var(--color-brand-orange)]">
-          Cómo funciona
+          {t.how.badge}
         </p>
         <h2 className="mt-3 font-display text-4xl font-bold tracking-tight sm:text-5xl">
-          Actívate en 3 pasos
+          {t.how.title}
         </h2>
       </div>
 
@@ -79,11 +48,11 @@ export function HowItWorks() {
               <Smartphone className="h-7 w-7" />
             </div>
             <div>
-              <h3 className="font-display text-xl font-bold">eSIM</h3>
-              <p className="text-sm text-muted-foreground">Compra y activa desde la web, al instante.</p>
+              <h3 className="font-display text-xl font-bold">{t.how.esimTitle}</h3>
+              <p className="text-sm text-muted-foreground">{t.how.esimSub}</p>
             </div>
           </div>
-          <StepList steps={esimSteps} />
+          <StepList steps={t.how.esimSteps} hint={t.how.verifyHint} />
         </div>
 
         {/* SIM física */}
@@ -96,17 +65,17 @@ export function HowItWorks() {
               <Store className="h-7 w-7" />
             </div>
             <div>
-              <h3 className="font-display text-xl font-bold">SIM física</h3>
-              <p className="text-sm text-muted-foreground">Recógela en tu partner de confianza.</p>
+              <h3 className="font-display text-xl font-bold">{t.how.simTitle}</h3>
+              <p className="text-sm text-muted-foreground">{t.how.simSub}</p>
             </div>
           </div>
-          <StepList steps={simSteps} />
+          <StepList steps={t.how.simSteps} hint={t.how.verifyHint} />
         </div>
       </div>
 
       <p className="mt-10 flex items-center justify-center gap-2 text-center text-sm font-medium text-foreground/80">
         <ScanFace className="h-5 w-5 text-[color:var(--color-brand-orange)]" />
-        Verificación de identidad 100% online, sin desplazarte a ninguna tienda.
+        {t.how.footnote}
       </p>
     </section>
   );

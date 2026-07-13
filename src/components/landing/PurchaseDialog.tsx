@@ -20,6 +20,7 @@ import {
 import { toast } from "sonner";
 import type { Plan } from "./plans";
 import { createCheckoutSession } from "@/lib/stripe";
+import { useI18n } from "@/lib/i18n";
 import { CreditCard, Smartphone, Check, Info, ShieldCheck } from "lucide-react";
 
 type SimType = "sim" | "esim";
@@ -37,6 +38,8 @@ export function PurchaseDialog({
   open: boolean;
   onOpenChange: (o: boolean) => void;
 }) {
+  const { t } = useI18n();
+  const tp = t.purchase;
   const [loading, setLoading] = useState(false);
   const [simType, setSimType] = useState<SimType>("sim");
   const [months, setMonths] = useState(1);
@@ -62,11 +65,11 @@ export function PurchaseDialog({
     const email2 = String(fd.get("email2") ?? "").trim();
 
     if (email !== email2) {
-      toast.error("Los emails no coinciden", { description: "Revisa el campo de confirmar email." });
+      toast.error(tp.emailsMismatchTitle, { description: tp.emailsMismatchDesc });
       return;
     }
     if (!tyc) {
-      toast.error("Debes aceptar los términos y condiciones para continuar.");
+      toast.error(tp.tycError);
       return;
     }
 
@@ -76,9 +79,7 @@ export function PurchaseDialog({
     const portaOperador =
       portability === "yes" ? String(fd.get("portaOperador") ?? "").trim() : "";
     if (portability === "yes" && (!portaNumero || !portaOperador)) {
-      toast.error("Faltan datos de portabilidad", {
-        description: "Indica tu número actual y tu operador actual.",
-      });
+      toast.error(tp.portaMissingTitle, { description: tp.portaMissingDesc });
       return;
     }
 
@@ -105,40 +106,41 @@ export function PurchaseDialog({
       });
       window.location.href = url; // a Stripe Checkout
     } catch (err) {
-      toast.error("No se pudo iniciar el pago", {
-        description: err instanceof Error ? err.message : "Revisa la configuración de Stripe.",
+      toast.error(tp.startErrTitle, {
+        description: err instanceof Error ? err.message : tp.startErrDesc,
       });
       setLoading(false);
     }
   }
 
   const total = plan ? plan.price * months : 0;
+  const monthWord = (n: number) => (n === 1 ? tp.monthOne : tp.monthMany);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md max-h-[92vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="font-display text-2xl">Contratar {plan?.name}</DialogTitle>
+          <DialogTitle className="font-display text-2xl">{tp.titlePrefix}{plan?.name}</DialogTitle>
           <DialogDescription>
-            {plan?.gb} GB · {plan?.priceLabel}/mes · sin permanencia. Elige formato y rellena tus datos.
+            {plan?.gb} GB · {plan?.priceLabel}{tp.perMonth}{tp.descSuffix}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <p className="mb-2 text-sm font-medium">Elige tu formato</p>
+            <p className="mb-2 text-sm font-medium">{tp.formatLabel}</p>
             <div className="grid grid-cols-2 gap-3">
               <SimOption
                 icon={<CreditCard className="h-5 w-5" />}
-                label="SIM física"
-                hint="Recógela en tu partner"
+                label={tp.simLabel}
+                hint={tp.simHint}
                 selected={simType === "sim"}
                 onClick={() => setSimType("sim")}
               />
               <SimOption
                 icon={<Smartphone className="h-5 w-5" />}
-                label="eSIM"
-                hint="Activación inmediata"
+                label={tp.esimLabel}
+                hint={tp.esimHint}
                 selected={simType === "esim"}
                 onClick={() => setSimType("esim")}
               />
@@ -146,51 +148,61 @@ export function PurchaseDialog({
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="name">Nombre completo</Label>
+            <Label htmlFor="name">{tp.name}</Label>
             <Input id="name" name="name" required placeholder="Ana Pérez" />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{tp.email}</Label>
             <Input id="email" name="email" type="email" required placeholder="tu@email.com" />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="email2">Confirmar email</Label>
-            <Input id="email2" name="email2" type="email" required placeholder="repite tu email" />
+            <Label htmlFor="email2">{tp.email2}</Label>
+            <Input id="email2" name="email2" type="email" required placeholder={tp.email2Ph} />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="phone">Teléfono</Label>
+            <Label htmlFor="phone">{tp.phone}</Label>
             <Input id="phone" name="phone" type="tel" required placeholder="600 123 456" />
           </div>
 
           {simType === "sim" ? (
             <div className="grid gap-2">
               <Label htmlFor="icc" className="flex items-center gap-1.5">
-                Número de ICC
+                {tp.icc}
                 <TooltipProvider delayDuration={100}>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <button type="button" aria-label="Más información sobre el ICC" className="text-muted-foreground">
+                      <button type="button" aria-label={tp.icc} className="text-muted-foreground">
                         <Info className="h-3.5 w-3.5" />
                       </button>
                     </TooltipTrigger>
                     <TooltipContent className="max-w-[240px]">
-                      Contacta con tu partner para conseguir tu SIM física.
+                      {tp.iccTooltip}
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
               </Label>
-              <Input id="icc" name="icc" required placeholder="89340000000000000000" inputMode="numeric" />
+              <Input
+                id="icc"
+                name="icc"
+                required
+                placeholder={tp.iccPh}
+                inputMode="numeric"
+                pattern="8934[0-9]{9}"
+                maxLength={13}
+                title={tp.iccHint}
+              />
+              <p className="text-xs text-muted-foreground">{tp.iccHint}</p>
             </div>
           ) : (
             <div className="flex items-start gap-2 rounded-xl border border-dashed border-border p-3 text-xs text-muted-foreground">
               <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[color:var(--color-brand-orange)]" />
-              Para activar tu eSIM tendrás que verificar tu identidad tras el pago.
+              {tp.esimNote}
             </div>
           )}
 
           {/* Portabilidad */}
           <div className="grid gap-2">
-            <Label>¿Quieres conservar tu número?</Label>
+            <Label>{tp.portaQ}</Label>
             <RadioGroup
               value={portability}
               onValueChange={(v) => setPortability(v as "no" | "yes")}
@@ -198,18 +210,18 @@ export function PurchaseDialog({
             >
               <label className="flex items-start gap-2 rounded-lg border border-border p-3 text-sm">
                 <RadioGroupItem value="no" id="port-no" className="mt-0.5" />
-                <span>No, quiero un <strong>número nuevo</strong>.</span>
+                <span>{tp.portaNoPre}<strong>{tp.portaNoStrong}</strong>{tp.portaNoPost}</span>
               </label>
               <label className="flex items-start gap-2 rounded-lg border border-border p-3 text-sm">
                 <RadioGroupItem value="yes" id="port-yes" className="mt-0.5" />
-                <span>Sí, ya tengo un número y quiero <strong>cambiarme a Connectivity</strong> (portabilidad).</span>
+                <span>{tp.portaYesPre}<strong>{tp.portaYesStrong}</strong>{tp.portaYesPost}</span>
               </label>
             </RadioGroup>
 
             {portability === "yes" && (
               <div className="mt-1 grid gap-3 rounded-xl border border-[color:var(--color-brand-orange)]/30 bg-[color:var(--color-brand-orange)]/5 p-3">
                 <div className="grid gap-2">
-                  <Label htmlFor="portaNumero">Tu número de teléfono actual</Label>
+                  <Label htmlFor="portaNumero">{tp.portaNumero}</Label>
                   <Input
                     id="portaNumero"
                     name="portaNumero"
@@ -220,11 +232,11 @@ export function PurchaseDialog({
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="portaOperador">Tu operador actual</Label>
+                  <Label htmlFor="portaOperador">{tp.portaOperador}</Label>
                   <Input
                     id="portaOperador"
                     name="portaOperador"
-                    placeholder="Movistar, Vodafone, Orange…"
+                    placeholder={tp.portaOperadorPh}
                     required
                   />
                 </div>
@@ -234,7 +246,7 @@ export function PurchaseDialog({
 
           {/* Meses de prepago */}
           <div className="grid gap-2">
-            <Label htmlFor="months">Meses a contratar (prepago)</Label>
+            <Label htmlFor="months">{tp.monthsLabel}</Label>
             <select
               id="months"
               value={months}
@@ -243,7 +255,7 @@ export function PurchaseDialog({
             >
               {Array.from({ length: 12 }, (_, i) => i + 1).map((n) => (
                 <option key={n} value={n}>
-                  {n} {n === 1 ? "mes" : "meses"}
+                  {n} {monthWord(n)}
                 </option>
               ))}
             </select>
@@ -253,11 +265,11 @@ export function PurchaseDialog({
           <label className="flex items-start gap-2 text-sm">
             <Checkbox checked={tyc} onCheckedChange={(c) => setTyc(c === true)} className="mt-0.5" />
             <span className="text-muted-foreground">
-              Acepto los{" "}
+              {tp.tycPre}
               <a href="/legal/aviso-legal" target="_blank" className="underline hover:text-foreground">
-                términos y condiciones
-              </a>{" "}
-              de la web.
+                {tp.tycLink}
+              </a>
+              {tp.tycPost}
             </span>
           </label>
 
@@ -266,11 +278,13 @@ export function PurchaseDialog({
             disabled={loading}
             className="w-full rounded-full bg-[image:var(--gradient-brand)] font-semibold text-white shadow-[var(--shadow-brand)] hover:opacity-95"
           >
-            {loading ? "Abriendo pago…" : `Pagar — ${eur(total)} (${months} ${months === 1 ? "mes" : "meses"})`}
+            {loading
+              ? tp.opening
+              : `${tp.payPrefix}${eur(total)} (${months} ${monthWord(months)})`}
           </Button>
 
           <p className="text-center text-[11px] text-muted-foreground">
-            Pago seguro con Stripe · Podrás aplicar tu código de descuento en el checkout.
+            {tp.payNote}
           </p>
         </form>
       </DialogContent>

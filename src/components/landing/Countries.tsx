@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Check, X, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { COUNTRIES } from "./countries-data";
+import { useI18n } from "@/lib/i18n";
 
 function normalize(s: string) {
   return s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
@@ -9,6 +10,7 @@ function normalize(s: string) {
 
 
 export function Countries() {
+  const { t } = useI18n();
   const [q, setQ] = useState("");
 
   const filtered = useMemo(() => {
@@ -27,29 +29,28 @@ export function Countries() {
       <div className="mx-auto max-w-5xl px-4 sm:px-6">
         <div className="mx-auto max-w-2xl text-center">
           <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">
-            Destinos internacionales
+            {t.countries.badge}
           </p>
           <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-            Descubre a qué países puedes llamar
+            {t.countries.title}
           </h2>
           <p className="mt-4 text-base text-foreground/70">
-            Bono de voz internacional de <strong>1.000 minutos</strong> a los siguientes destinos.
-            Consulta si el país que buscas está incluido para llamadas a fijo, móvil o ambos.
+            {t.countries.subtitle}
           </p>
         </div>
 
         <div className="mt-10 grid gap-3 sm:grid-cols-3">
           <div className="rounded-2xl border border-border/60 bg-background p-5 text-center shadow-sm">
             <div className="font-display text-3xl font-bold text-foreground">{COUNTRIES.length}</div>
-            <div className="mt-1 text-sm text-foreground/60">Destinos disponibles</div>
+            <div className="mt-1 text-sm text-foreground/60">{t.countries.statDestinos}</div>
           </div>
           <div className="rounded-2xl border border-border/60 bg-background p-5 text-center shadow-sm">
             <div className="font-display text-3xl font-bold text-foreground">{totalFijo}</div>
-            <div className="mt-1 text-sm text-foreground/60">Con llamadas a fijo</div>
+            <div className="mt-1 text-sm text-foreground/60">{t.countries.statFijo}</div>
           </div>
           <div className="rounded-2xl border border-border/60 bg-background p-5 text-center shadow-sm">
             <div className="font-display text-3xl font-bold text-foreground">{totalMovil}</div>
-            <div className="mt-1 text-sm text-foreground/60">Con llamadas a móvil</div>
+            <div className="mt-1 text-sm text-foreground/60">{t.countries.statMovil}</div>
           </div>
         </div>
 
@@ -60,17 +61,17 @@ export function Countries() {
               <Input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Buscar país…"
+                placeholder={t.countries.searchPh}
                 className="h-11 rounded-full border-border/60 pl-10 text-sm"
-                aria-label="Buscar país"
+                aria-label={t.countries.searchPh}
               />
             </div>
           </div>
 
           <div className="grid grid-cols-[1fr_auto_auto] items-center gap-3 border-b border-border/60 px-4 py-3 text-xs font-semibold uppercase tracking-wider text-foreground/50 sm:px-6">
-            <span>País</span>
-            <span className="w-16 text-center sm:w-24">Fijo</span>
-            <span className="w-16 text-center sm:w-24">Móvil</span>
+            <span>{t.countries.country}</span>
+            <span className="w-16 text-center sm:w-24">{t.countries.fijo}</span>
+            <span className="w-16 text-center sm:w-24">{t.countries.movil}</span>
           </div>
 
           <ul className="max-h-[520px] divide-y divide-border/60 overflow-y-auto">
@@ -82,31 +83,30 @@ export function Countries() {
                 <span className="font-medium">{c.name}</span>
                 <span className="flex w-16 justify-center sm:w-24">
                   {c.fijo ? (
-                    <Check className="h-5 w-5 text-primary" aria-label="Incluido" />
+                    <Check className="h-5 w-5 text-primary" aria-label={t.countries.included} />
                   ) : (
-                    <X className="h-5 w-5 text-foreground/30" aria-label="No incluido" />
+                    <X className="h-5 w-5 text-foreground/30" aria-label={t.countries.notIncluded} />
                   )}
                 </span>
                 <span className="flex w-16 justify-center sm:w-24">
                   {c.movil ? (
-                    <Check className="h-5 w-5 text-primary" aria-label="Incluido" />
+                    <Check className="h-5 w-5 text-primary" aria-label={t.countries.included} />
                   ) : (
-                    <X className="h-5 w-5 text-foreground/30" aria-label="No incluido" />
+                    <X className="h-5 w-5 text-foreground/30" aria-label={t.countries.notIncluded} />
                   )}
                 </span>
               </li>
             ))}
             {filtered.length === 0 && (
               <li className="px-6 py-8 text-center text-sm text-foreground/60">
-                No encontramos ese país en los destinos incluidos.
+                {t.countries.empty}
               </li>
             )}
           </ul>
         </div>
 
         <p className="mt-6 text-center text-xs text-foreground/50">
-          Superado el bono de voz internacional, el precio de la llamada y el establecimiento serán
-          el estándar de cada destino.
+          {t.countries.footnote}
         </p>
       </div>
     </section>

@@ -1,6 +1,8 @@
 import { Button } from "@/components/ui/button";
+import { useI18n } from "@/lib/i18n";
 
 export function Hero() {
+  const { t } = useI18n();
   return (
     <section
       id="top"
@@ -18,18 +20,17 @@ export function Hero() {
       />
       <div className="relative mx-auto max-w-5xl px-4 text-center sm:px-6">
         <h1 className="mt-6 font-display text-5xl font-extrabold leading-[1.05] tracking-tight text-foreground sm:text-6xl md:text-7xl">
-          Tu SIM/eSIM 5G española
+          {t.hero.titleLine1}
           <br />
           <span
             className="bg-clip-text text-transparent"
             style={{ backgroundImage: "var(--gradient-brand)" }}
           >
-            activada online en 3 minutos.
+            {t.hero.titleLine2}
           </span>
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground sm:text-xl">
-          Sin ir a la tienda. Sin contratos. Gigas que se acumulan y llamadas
-          ilimitadas en España.
+          {t.hero.subtitle}
         </p>
         <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
           <Button
@@ -37,7 +38,7 @@ export function Hero() {
             size="lg"
             className="h-12 rounded-full bg-[image:var(--gradient-brand)] px-8 text-base font-semibold text-white shadow-[var(--shadow-brand)] transition-transform hover:scale-[1.02] hover:opacity-95"
           >
-            <a href="#planes">Elegir mi plan</a>
+            <a href="#planes">{t.hero.ctaPlan}</a>
           </Button>
           <Button
             asChild
@@ -45,7 +46,7 @@ export function Hero() {
             variant="outline"
             className="h-12 rounded-full border-foreground/20 px-8 text-base font-semibold"
           >
-            <a href="#como-funciona">¿Cómo funciona?</a>
+            <a href="#como-funciona">{t.hero.ctaHow}</a>
           </Button>
         </div>
       </div>
