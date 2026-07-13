@@ -54,6 +54,15 @@ export async function writePagoToSheets(
   return row ?? 0;
 }
 
+/** Añade una fila a "Incidencias" (soporte). Dedupe por Incidencia ID. */
+export async function appendIncidenciaToSheets(
+  incidenciaId: string,
+  values: (string | number)[],
+): Promise<number> {
+  const { row } = await postToSheets({ action: "incidencia", incidenciaId, values });
+  return row ?? 0;
+}
+
 /** Escribe/actualiza la fila de "Validacion Didit" (dedupe por fila de formulario). */
 export async function writeValidacionToSheets(
   formRow: number,

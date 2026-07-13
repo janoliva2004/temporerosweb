@@ -18,6 +18,7 @@
  *   - "order"      -> añade fila en Input Form Web (compra). Devuelve la fila.
  *   - "pago"       -> Fecha Pago en Input Form Web + ID Stripe en Validacion Didit.
  *   - "validacion" -> resultado Didit en Validacion Didit (dedupe por fila formulario).
+ *   - "incidencia" -> añade fila en Incidencias (soporte). Crea la hoja si no existe.
  *
  * Las escrituras NO sobrescriben celdas con valor vacío: así el pago (col A)
  * y la validación Didit (cols B..G) pueden rellenar la misma fila por separado.
@@ -28,6 +29,7 @@ var SECRET_TOKEN = "CAMBIA_ESTO_por_una_cadena_larga_aleatoria";
 
 var INPUT_SHEET = "Input Form Web";        // columnas A..N
 var VALIDACION_SHEET = "Validacion Didit"; // columnas A..J (J = Fila formulario)
+var INCIDENCIAS_SHEET = "Incidencias";     // columnas A..H (se crea sola)
 
 function doPost(e) {
   try {
@@ -56,6 +58,18 @@ function doPost(e) {
           "Mensaje:\n" + (data.message || ""),
       });
       return json_({ ok: true });
+    }
+
+    if (data.action === "incidencia") {
+      // Crea la hoja "Incidencias" con cabeceras si aún no existe.
+      ensureSheet_(INCIDENCIAS_SHEET, [
+        "Time Stamp", "Incidencia ID", "Nombre", "Email",
+        "Teléfono", "Categoría", "Mensaje", "Estado",
+      ]);
+      // keyCol 1 (Time Stamp, siempre presente) para la primera fila libre;
+      // dedupe por Incidencia ID (col 2) → reintentos no crean fila doble.
+      var incRow = writeRow_(INCIDENCIAS_SHEET, data.values, 1, 2, data.incidenciaId);
+      return json_({ ok: true, row: incRow });
     }
 
     if (data.action === "pago") {
@@ -93,6 +107,18 @@ function doGet() {
  *  - dedupeCol / dedupeVal: si se pasan, actualiza la fila con ese valor en vez de crear.
  * Devuelve el número de fila escrita.
  */
+/** Devuelve la hoja `name`; si no existe, la crea con una fila de cabeceras. */
+function ensureSheet_(name, headers) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName(name);
+  if (!sheet) {
+    sheet = ss.insertSheet(name);
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]).setFontWeight("bold");
+    sheet.setFrozenRows(1);
+  }
+  return sheet;
+}
+
 function writeRow_(sheetName, values, keyCol, dedupeCol, dedupeVal) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName(sheetName);

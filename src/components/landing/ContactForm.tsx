@@ -3,9 +3,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { submitContact } from "@/lib/contact";
+import { submitIncidencia, INCIDENCIA_CATEGORIES } from "@/lib/support";
 import { useI18n } from "@/lib/i18n";
 import { Mail, MessageCircle } from "lucide-react";
+
+type Category = (typeof INCIDENCIA_CATEGORIES)[number];
 
 export function ContactForm() {
   const { t } = useI18n();
@@ -17,16 +19,18 @@ export function ContactForm() {
     const fd = new FormData(form);
     setLoading(true);
     try {
-      await submitContact({
+      const { id } = await submitIncidencia({
         data: {
           name: String(fd.get("name") ?? "").trim(),
           email: String(fd.get("email") ?? "").trim(),
+          phone: String(fd.get("phone") ?? "").trim(),
+          category: (String(fd.get("category") ?? "otro") as Category),
           message: String(fd.get("message") ?? "").trim(),
         },
       });
       form.reset();
       toast.success(t.contact.successTitle, {
-        description: t.contact.successDesc,
+        description: `${t.contact.ticket}: ${id} · ${t.contact.successDesc}`,
       });
     } catch (err) {
       toast.error(t.contact.errTitle, {
@@ -61,6 +65,31 @@ export function ContactForm() {
             <div className="grid gap-2">
               <Label htmlFor="c-email">{t.contact.email}</Label>
               <Input id="c-email" name="email" type="email" required placeholder={t.contact.emailPh} />
+            </div>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-2">
+              <Label htmlFor="c-phone">{t.contact.phone}</Label>
+              <Input id="c-phone" name="phone" type="tel" inputMode="numeric" placeholder={t.contact.phonePh} />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="c-category">{t.contact.category}</Label>
+              <select
+                id="c-category"
+                name="category"
+                required
+                defaultValue=""
+                className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+              >
+                <option value="" disabled>
+                  {t.contact.categoryPh}
+                </option>
+                {INCIDENCIA_CATEGORIES.map((c) => (
+                  <option key={c} value={c}>
+                    {t.contact.categories[c]}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
           <div className="grid gap-2">
