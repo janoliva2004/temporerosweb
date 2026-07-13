@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -7,7 +8,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { PLANS, type Plan } from "./plans";
+import { PLAN_FAMILIES, type Plan, type PlanFamily } from "./plans";
 import { COUNTRIES } from "./countries-data";
 import { Check, Globe2, X } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
@@ -29,52 +30,96 @@ export function PlansSection({ onBuy }: { onBuy: (plan: Plan) => void }) {
           </p>
         </div>
 
-        <div className="mt-14 flex flex-col gap-6">
-          {PLANS.map((plan) => (
-            <PlanRow key={plan.id} plan={plan} onBuy={() => onBuy(plan)} />
+        <div className="mx-auto mt-16 grid max-w-4xl items-stretch gap-6 md:grid-cols-2">
+          {PLAN_FAMILIES.map((family) => (
+            <PlanCard key={family.id} family={family} onBuy={onBuy} />
           ))}
         </div>
-
       </div>
     </section>
   );
 }
 
-function PlanRow({ plan, onBuy }: { plan: Plan; onBuy: () => void }) {
+function PlanCard({
+  family,
+  onBuy,
+}: {
+  family: PlanFamily;
+  onBuy: (plan: Plan) => void;
+}) {
   const { t } = useI18n();
-  const features = t.plans.features[plan.id];
+  const fam = t.plans.families[family.id];
+  const [idx, setIdx] = useState(0);
+  const variant = family.variants[idx];
+  const highlight = family.id === "intl";
+
   return (
     <div
-      role="button"
-      tabIndex={0}
-      onClick={onBuy}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onBuy();
-        }
-      }}
-      className="group grid cursor-pointer grid-cols-1 items-center gap-6 rounded-3xl border-2 border-border bg-card p-6 shadow-sm transition-all hover:-translate-y-1 hover:border-[color:var(--color-brand-orange)] hover:shadow-[var(--shadow-brand)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-brand-orange)] md:grid-cols-[auto_auto_1fr_auto] md:gap-10 md:p-10"
+      className={`relative flex flex-col rounded-3xl border-2 bg-card p-7 shadow-sm transition-all hover:shadow-[var(--shadow-brand)] sm:p-8 ${
+        highlight
+          ? "border-[color:var(--color-brand-orange)]"
+          : "border-border hover:border-[color:var(--color-brand-orange)]/40"
+      }`}
     >
-      <div className="flex items-baseline gap-1 md:min-w-[150px]">
+      <span
+        className={`absolute -top-3 left-7 rounded-full px-3 py-1 text-xs font-bold shadow-sm sm:left-8 ${
+          highlight
+            ? "bg-[image:var(--gradient-brand)] text-white"
+            : "bg-foreground/85 text-white"
+        }`}
+      >
+        {fam.badge}
+      </span>
+
+      <div>
+        <h3 className="font-display text-2xl font-bold text-foreground">{fam.name}</h3>
+        <p className="mt-1 text-sm text-muted-foreground">{fam.tagline}</p>
+      </div>
+
+      {/* Selector de GB */}
+      <div className="mt-6">
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          {t.plans.choose}
+        </p>
+        <div className="inline-flex rounded-full border border-border bg-muted/40 p-1">
+          {family.variants.map((v, i) => (
+            <button
+              key={v.id}
+              type="button"
+              onClick={() => setIdx(i)}
+              aria-pressed={i === idx}
+              className={`rounded-full px-5 py-2 text-sm font-bold transition-all ${
+                i === idx
+                  ? "bg-[image:var(--gradient-brand)] text-white shadow-sm"
+                  : "text-foreground/70 hover:text-foreground"
+              }`}
+            >
+              {v.gb} GB
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Precio (se adapta a la opción de GB elegida) */}
+      <div className="mt-6 flex items-baseline gap-1">
         <span
-          className="font-display text-6xl font-extrabold bg-clip-text text-transparent"
+          className="font-display text-5xl font-extrabold bg-clip-text text-transparent"
           style={{ backgroundImage: "var(--gradient-brand)" }}
         >
-          {plan.priceLabel.replace(" €", "")}
+          {variant.priceLabel.replace(" €", "")}
         </span>
         <span className="text-lg font-semibold text-foreground/70">{t.plans.perMonth}</span>
       </div>
 
-      <div className="md:min-w-[170px] md:border-l md:border-border md:pl-10">
-        <p className="text-sm uppercase tracking-wider text-muted-foreground">{t.plans.mobile}</p>
-        <p className="font-display text-3xl font-bold text-foreground">
-          {plan.gb} <span className="text-xl font-semibold text-foreground/70">GB</span>
-        </p>
-      </div>
-
-      <ul className="space-y-2 text-sm text-foreground/80 md:pl-4">
-        {features.map((f) => (
+      {/* Características */}
+      <ul className="mt-6 space-y-2.5 text-sm text-foreground/80">
+        <li className="flex items-start gap-2">
+          <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[color:var(--color-brand-orange)]" />
+          <span className="font-bold text-foreground">
+            {variant.gb} {t.plans.gbSuffix}
+          </span>
+        </li>
+        {fam.features.map((f) => (
           <li key={f.text} className="flex items-start gap-2">
             <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[color:var(--color-brand-orange)]" />
             {f.kind === "countries" ? (
@@ -88,14 +133,11 @@ function PlanRow({ plan, onBuy }: { plan: Plan; onBuy: () => void }) {
         ))}
       </ul>
 
-      <div className="md:min-w-[200px]">
+      <div className="mt-auto pt-8">
         <Button
-          onClick={(e) => {
-            e.stopPropagation();
-            onBuy();
-          }}
+          onClick={() => onBuy(variant)}
           size="lg"
-          className="h-14 w-full rounded-full bg-[image:var(--gradient-brand)] text-base font-semibold text-white shadow-[var(--shadow-brand)] transition-transform group-hover:scale-[1.02] hover:opacity-95"
+          className="h-14 w-full rounded-full bg-[image:var(--gradient-brand)] text-base font-semibold text-white shadow-[var(--shadow-brand)] transition-transform hover:scale-[1.02] hover:opacity-95"
         >
           {t.plans.buy}
         </Button>
@@ -111,7 +153,6 @@ function CountriesFeature() {
       <DialogTrigger asChild>
         <button
           type="button"
-          onClick={(e) => e.stopPropagation()}
           className="inline-flex w-full cursor-pointer items-center gap-2 text-left font-medium text-foreground underline decoration-[color:var(--color-brand-orange)]/50 underline-offset-4 transition-colors hover:text-[color:var(--color-brand-orange)] hover:decoration-[color:var(--color-brand-orange)] sm:w-auto"
           aria-label={t.plans.intlAria}
         >
@@ -120,11 +161,7 @@ function CountriesFeature() {
         </button>
       </DialogTrigger>
 
-
-      <DialogContent
-        onClick={(e) => e.stopPropagation()}
-        className="max-h-[92vh] w-[calc(100vw-24px)] max-w-5xl overflow-hidden rounded-2xl border-border p-0 sm:rounded-3xl"
-      >
+      <DialogContent className="max-h-[92vh] w-[calc(100vw-24px)] max-w-5xl overflow-hidden rounded-2xl border-border p-0 sm:rounded-3xl">
         <DialogHeader className="border-b border-border bg-[color:var(--color-brand-orange)]/[0.06] px-6 py-5 text-left sm:px-8">
           <DialogTitle className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
             {t.plans.dialog.title}

@@ -67,7 +67,7 @@ const OrderSchema = z.object({
   portaNumero: z.string().trim().max(40).optional().default(""),
   portaOperador: z.string().trim().max(60).optional().default(""),
   months: z.number().int().min(1).max(12),
-  planId: z.enum(["p80", "p150"]),
+  planId: z.enum(["intl80", "intl150", "nac60", "nac150"]),
   planCode: z.string().trim().min(1).max(40),
   planGb: z.number().int().positive(),
   planName: z.string().trim().min(1).max(80),

@@ -59,11 +59,13 @@ const es = {
   },
   plans: {
     badge: "Elige y activa hoy",
-    title: "2 súper planes con llamadas a tu país y gigas acumulables!",
-    subtitle: "Selecciona tu plan. La compra y la activación online empiezan aquí.",
+    title: "Dos planes. Tú eliges los GB.",
+    subtitle: "Con llamadas internacionales o solo España. Gigas acumulables y red 5G en ambos.",
     perMonth: "€/mes",
     mobile: "Móvil",
     buy: "Comprar y activar",
+    choose: "Elige tus datos",
+    gbSuffix: "GB acumulables cada mes",
     intl: "1.000 min a países (fijo y móvil)",
     intlAria: "Ver países disponibles para llamadas internacionales",
     dialog: {
@@ -73,21 +75,28 @@ const es = {
       fijo: "Fijo",
       movil: "Móvil",
     },
-    features: {
-      p80: [
-        { text: "80 GB acumulables cada mes", kind: "bold" },
-        { text: "Llamadas nacionales ilimitadas", kind: "normal" },
-        { text: "1.000 min a países (fijo y móvil)", kind: "countries" },
-        { text: "Activación online con reconocimiento facial", kind: "normal" },
-        { text: "Red MÁS Orange 5G · Sin permanencia", kind: "normal" },
-      ] as Feature[],
-      p150: [
-        { text: "150 GB acumulables cada mes", kind: "bold" },
-        { text: "Llamadas nacionales ilimitadas", kind: "normal" },
-        { text: "1.000 min a países (fijo y móvil)", kind: "countries" },
-        { text: "Activación online con reconocimiento facial", kind: "normal" },
-        { text: "Red MÁS Orange 5G · Sin permanencia", kind: "normal" },
-      ] as Feature[],
+    families: {
+      intl: {
+        name: "Internacional",
+        tagline: "Con llamadas a tu país incluidas.",
+        badge: "Más completo",
+        features: [
+          { text: "Llamadas nacionales ilimitadas", kind: "normal" },
+          { text: "1.000 min a países (fijo y móvil)", kind: "countries" },
+          { text: "Activación online con reconocimiento facial", kind: "normal" },
+          { text: "Red MÁS Orange 5G · Sin permanencia", kind: "normal" },
+        ] as Feature[],
+      },
+      nac: {
+        name: "Nacional",
+        tagline: "Solo España, al mejor precio.",
+        badge: "Mejor precio",
+        features: [
+          { text: "Llamadas nacionales ilimitadas", kind: "normal" },
+          { text: "Activación online con reconocimiento facial", kind: "normal" },
+          { text: "Red MÁS Orange 5G · Sin permanencia", kind: "normal" },
+        ] as Feature[],
+      },
     },
   },
   how: {
@@ -266,11 +275,13 @@ const en: Dict = {
   },
   plans: {
     badge: "Choose and activate today",
-    title: "2 great plans with calls to your country and rollover data!",
-    subtitle: "Select your plan. Purchase and online activation start here.",
+    title: "Two plans. You pick the GB.",
+    subtitle: "With international calls or Spain only. Rollover data and 5G network on both.",
     perMonth: "€/mo",
     mobile: "Mobile",
     buy: "Buy and activate",
+    choose: "Choose your data",
+    gbSuffix: "GB rollover data every month",
     intl: "1,000 min to countries (landline & mobile)",
     intlAria: "See available countries for international calls",
     dialog: {
@@ -280,21 +291,28 @@ const en: Dict = {
       fijo: "Landline",
       movil: "Mobile",
     },
-    features: {
-      p80: [
-        { text: "80 GB rollover data every month", kind: "bold" },
-        { text: "Unlimited national calls", kind: "normal" },
-        { text: "1,000 min to countries (landline & mobile)", kind: "countries" },
-        { text: "Online activation with facial recognition", kind: "normal" },
-        { text: "MÁS Orange 5G network · No commitment", kind: "normal" },
-      ],
-      p150: [
-        { text: "150 GB rollover data every month", kind: "bold" },
-        { text: "Unlimited national calls", kind: "normal" },
-        { text: "1,000 min to countries (landline & mobile)", kind: "countries" },
-        { text: "Online activation with facial recognition", kind: "normal" },
-        { text: "MÁS Orange 5G network · No commitment", kind: "normal" },
-      ],
+    families: {
+      intl: {
+        name: "International",
+        tagline: "Calls to your country included.",
+        badge: "Most complete",
+        features: [
+          { text: "Unlimited national calls", kind: "normal" },
+          { text: "1,000 min to countries (landline & mobile)", kind: "countries" },
+          { text: "Online activation with facial recognition", kind: "normal" },
+          { text: "MÁS Orange 5G network · No commitment", kind: "normal" },
+        ],
+      },
+      nac: {
+        name: "National",
+        tagline: "Spain only, at the best price.",
+        badge: "Best price",
+        features: [
+          { text: "Unlimited national calls", kind: "normal" },
+          { text: "Online activation with facial recognition", kind: "normal" },
+          { text: "MÁS Orange 5G network · No commitment", kind: "normal" },
+        ],
+      },
     },
   },
   how: {
@@ -471,11 +489,13 @@ const fr: Dict = {
   },
   plans: {
     badge: "Choisis et active aujourd'hui",
-    title: "2 super forfaits avec appels vers ton pays et Go cumulables !",
-    subtitle: "Sélectionne ton forfait. L'achat et l'activation en ligne commencent ici.",
+    title: "Deux forfaits. Tu choisis les Go.",
+    subtitle: "Avec appels internationaux ou Espagne uniquement. Go cumulables et réseau 5G sur les deux.",
     perMonth: "€/mois",
     mobile: "Mobile",
     buy: "Acheter et activer",
+    choose: "Choisis tes données",
+    gbSuffix: "Go cumulables chaque mois",
     intl: "1 000 min vers l'étranger (fixe et mobile)",
     intlAria: "Voir les pays disponibles pour les appels internationaux",
     dialog: {
@@ -485,21 +505,28 @@ const fr: Dict = {
       fijo: "Fixe",
       movil: "Mobile",
     },
-    features: {
-      p80: [
-        { text: "80 Go cumulables chaque mois", kind: "bold" },
-        { text: "Appels nationaux illimités", kind: "normal" },
-        { text: "1 000 min vers l'étranger (fixe et mobile)", kind: "countries" },
-        { text: "Activation en ligne avec reconnaissance faciale", kind: "normal" },
-        { text: "Réseau MÁS Orange 5G · Sans engagement", kind: "normal" },
-      ],
-      p150: [
-        { text: "150 Go cumulables chaque mois", kind: "bold" },
-        { text: "Appels nationaux illimités", kind: "normal" },
-        { text: "1 000 min vers l'étranger (fixe et mobile)", kind: "countries" },
-        { text: "Activation en ligne avec reconnaissance faciale", kind: "normal" },
-        { text: "Réseau MÁS Orange 5G · Sans engagement", kind: "normal" },
-      ],
+    families: {
+      intl: {
+        name: "International",
+        tagline: "Appels vers ton pays inclus.",
+        badge: "Le plus complet",
+        features: [
+          { text: "Appels nationaux illimités", kind: "normal" },
+          { text: "1 000 min vers l'étranger (fixe et mobile)", kind: "countries" },
+          { text: "Activation en ligne avec reconnaissance faciale", kind: "normal" },
+          { text: "Réseau MÁS Orange 5G · Sans engagement", kind: "normal" },
+        ],
+      },
+      nac: {
+        name: "National",
+        tagline: "Espagne uniquement, au meilleur prix.",
+        badge: "Meilleur prix",
+        features: [
+          { text: "Appels nationaux illimités", kind: "normal" },
+          { text: "Activation en ligne avec reconnaissance faciale", kind: "normal" },
+          { text: "Réseau MÁS Orange 5G · Sans engagement", kind: "normal" },
+        ],
+      },
     },
   },
   how: {
