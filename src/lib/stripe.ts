@@ -229,15 +229,15 @@ export const verifyCheckout = createServerFn({ method: "POST" })
     // si Stripe no devolviera el ID, para no dejar la celda vacía.
     const orderId = stripeId || `ORD-${data.sessionId.slice(-14).toUpperCase()}`;
 
-    // Fila A..T de "Input Form Web".
+    // Fila A..S de "Input Form Web".
     const row: (string | number)[] = [
       ts(now),                                             // A  Time Stamp
       "ES",                                                // B  Country
       m.name || "",                                        // C  Nombre Cliente
-      m.email || "",                                        // D  email Cliente
+      m.email || "",                                       // D  email Cliente
       ymd(now),                                            // E  Activation date (= Fecha Pago, por ahora)
       m.simType === "sim" ? "SIM" : "eSIM",                // F  SIM/eSIM
-      orderId,                                             // G  Order ID (= ID de Stripe)
+      orderId,                                             // G  stripe ID (= ID de Stripe del pago)
       m.simType === "sim" ? m.icc || "" : "",              // H  ICC (SIM física)
       "Activation",                                        // I  ProductAction
       Number(m.planGb || "0"),                             // J  Plan Type (GBs)
@@ -245,12 +245,11 @@ export const verifyCheckout = createServerFn({ method: "POST" })
       "",                                                  // L  Fecha Pago (lo escribe el action "pago")
       Math.round(price * months * 100) / 100,              // M  Importe pagado (Con IVA)
       "",                                                  // N  Partner ID
-      m.phone || "",                                       // O  Phone
+      m.phone || "",                                       // O  Phone (número del cliente)
       m.planCode || "",                                    // P  Plan Code
       m.portability === "yes" ? m.portaNumero || "" : "",  // Q  Numero portabilidad
       "Likes",                                             // R  Operador (siempre Likes)
       coupon,                                              // S  Referral (código de descuento Stripe, si hubo)
-      m.phone || "",                                       // T  Numero cliente
     ];
 
     const formRow = await appendOrderToSheets(orderId, row);
