@@ -229,7 +229,7 @@ export const verifyCheckout = createServerFn({ method: "POST" })
     // si Stripe no devolviera el ID, para no dejar la celda vacía.
     const orderId = stripeId || `ORD-${data.sessionId.slice(-14).toUpperCase()}`;
 
-    // Fila A..S de "Input Form Web".
+    // Fila A..T de "Input Form Web".
     const row: (string | number)[] = [
       ts(now),                                             // A  Time Stamp
       "ES",                                                // B  Country
@@ -247,9 +247,10 @@ export const verifyCheckout = createServerFn({ method: "POST" })
       "",                                                  // N  Partner ID
       m.phone || "",                                       // O  Phone (número del cliente)
       m.planCode || "",                                    // P  Plan Code
-      m.portability === "yes" ? m.portaNumero || "" : "",  // Q  Numero portabilidad
-      "Likes",                                             // R  Operador (siempre Likes)
-      coupon,                                              // S  Referral (código de descuento Stripe, si hubo)
+      m.portability === "yes" ? m.portaNumero || "" : "",   // Q  Numero portabilidad
+      m.portability === "yes" ? m.portaOperador || "" : "", // R  Operador Portabilidad (operador actual del cliente)
+      "Likes",                                              // S  Operador (proveedor, siempre Likes)
+      coupon,                                               // T  Referral (código de descuento Stripe, si hubo)
     ];
 
     const formRow = await appendOrderToSheets(orderId, row);
