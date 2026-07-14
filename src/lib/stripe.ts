@@ -175,11 +175,36 @@ function ymd(d: Date): string {
   return `${p.year}-${p.month}-${p.day}`;
 }
 
+// Código de descuento aplicado en el checkout, o "" si no hubo. Con
+// discounts.promotion_code expandido, preferimos el código legible que teclea
+// el cliente (promotion_code.code); si solo hay cupón "automático", usamos su
+// nombre o id.
+function couponFromSession(session: Record<string, unknown>): string {
+  const discounts = session.discounts as
+    | Array<{
+        promotion_code?: { code?: string } | string | null;
+        coupon?: { name?: string; id?: string } | string | null;
+      }>
+    | undefined;
+  const d = discounts?.[0];
+  if (!d) return "";
+  const pc = d.promotion_code;
+  if (pc && typeof pc === "object" && pc.code) return pc.code;
+  const c = d.coupon;
+  if (c && typeof c === "object") return c.name || c.id || "";
+  if (typeof c === "string") return c;
+  return "";
+}
+
 /** 2) Verifica el pago y, SOLO si está pagado, crea la fila en el Sheet. */
 export const verifyCheckout = createServerFn({ method: "POST" })
   .validator((input: unknown) => z.object({ sessionId: z.string().min(1) }).parse(input))
   .handler(async ({ data }) => {
-    const session = await stripe(`/checkout/sessions/${data.sessionId}`, "GET");
+    // Expandimos los descuentos para poder leer el código de promoción que el
+    // cliente escribió en el checkout (va a la columna Referral de la hoja).
+    const session = await stripe(`/checkout/sessions/${data.sessionId}`, "GET", {
+      "expand[0]": "discounts.promotion_code",
+    });
 
     const paid = session.payment_status === "paid" || session.status === "complete";
     // En modo "payment" sin customer_creation, session.customer suele ser null;
@@ -189,6 +214,11 @@ export const verifyCheckout = createServerFn({ method: "POST" })
     const m = (session.metadata as SessionMeta | null) ?? {};
 
     if (!paid) return { paid: false as const, formRow: 0 };
+
+    // Código de descuento usado (si lo hubo). Preferimos el código legible del
+    // promotion_code (lo que teclea el cliente, ej. "VERANO10"); si no, el id
+    // del cupón. Vacío si la compra no llevaba descuento.
+    const coupon = couponFromSession(session);
 
     const months = Number(m.months || "1");
     const price = Number(m.price || "0");
@@ -205,9 +235,9 @@ export const verifyCheckout = createServerFn({ method: "POST" })
       "ES",                                                // B  Country
       m.name || "",                                        // C  Nombre Cliente
       m.email || "",                                        // D  email Cliente
-      "",                                                  // E  Activation date
+      ymd(now),                                            // E  Activation date (= Fecha Pago, por ahora)
       m.simType === "sim" ? "SIM" : "eSIM",                // F  SIM/eSIM
-      orderId,                                             // G  Order ID
+      orderId,                                             // G  Order ID (= ID de Stripe)
       m.simType === "sim" ? m.icc || "" : "",              // H  ICC (SIM física)
       "Activation",                                        // I  ProductAction
       Number(m.planGb || "0"),                             // J  Plan Type (GBs)
@@ -218,8 +248,8 @@ export const verifyCheckout = createServerFn({ method: "POST" })
       m.phone || "",                                       // O  Phone
       m.planCode || "",                                    // P  Plan Code
       m.portability === "yes" ? m.portaNumero || "" : "",  // Q  Numero portabilidad
-      m.portability === "yes" ? m.portaOperador || "" : "",// R  Operador
-      "",                                                  // S  Referral
+      "Likes",                                             // R  Operador (siempre Likes)
+      coupon,                                              // S  Referral (código de descuento Stripe, si hubo)
       m.phone || "",                                       // T  Numero cliente
     ];
 
