@@ -193,27 +193,34 @@ export const verifyCheckout = createServerFn({ method: "POST" })
     const months = Number(m.months || "1");
     const price = Number(m.price || "0");
     const now = new Date();
-    // Order ID determinista a partir de la sesión → reintentos no duplican fila.
-    const orderId = `ORD-${data.sessionId.slice(-14).toUpperCase()}`;
+    // Order ID = ID de Stripe del pago (payment_intent, ej. "pi_…"). Así la col B
+    // de "Input Form Web" coincide con el ID de Stripe. Es estable por pago, así
+    // que los reintentos de /pago-ok no duplican fila. Fallback determinista por
+    // si Stripe no devolviera el ID, para no dejar la celda vacía.
+    const orderId = stripeId || `ORD-${data.sessionId.slice(-14).toUpperCase()}`;
 
-    // Fila A..N de "Input Form Web".
+    // Fila A..T de "Input Form Web".
     const row: (string | number)[] = [
-      ts(now),                                  // A  Time Stamp
-      orderId,                                  // B  Order ID
-      "ES",                                     // C  Country
-      "Activation",                             // D  ProductAction
-      Number(m.planGb || "0"),                  // E  Plan Type (GBs)
-      "",                                       // F  Activation date
-      ymd(now),                                 // G  Fecha Pago
-      Math.round(price * months * 100) / 100,   // H  Importe pagado (Con IVA)
-      "",                                       // I  Partner ID
-      m.name || "",                             // J  Nombre Cliente
-      m.email || "",                            // K  email Cliente
-      m.simType === "sim" ? m.icc || "" : "",   // L  ICC (SIM física)
-      m.phone || "",                            // M  Phone
-      m.planCode || "",                         // N  Plan Code
-      m.portability === "yes" ? m.portaNumero || "" : "",   // O  ICC PORTA (número actual)
-      m.portability === "yes" ? m.portaOperador || "" : "", // P  OPERADOR (operador actual)
+      ts(now),                                             // A  Time Stamp
+      "ES",                                                // B  Country
+      m.name || "",                                        // C  Nombre Cliente
+      m.email || "",                                        // D  email Cliente
+      "",                                                  // E  Activation date
+      m.simType === "sim" ? "SIM" : "eSIM",                // F  SIM/eSIM
+      orderId,                                             // G  Order ID
+      m.simType === "sim" ? m.icc || "" : "",              // H  ICC (SIM física)
+      "Activation",                                        // I  ProductAction
+      Number(m.planGb || "0"),                             // J  Plan Type (GBs)
+      months * 30,                                         // K  Plan duration (días)
+      "",                                                  // L  Fecha Pago (lo escribe el action "pago")
+      Math.round(price * months * 100) / 100,              // M  Importe pagado (Con IVA)
+      "",                                                  // N  Partner ID
+      m.phone || "",                                       // O  Phone
+      m.planCode || "",                                    // P  Plan Code
+      m.portability === "yes" ? m.portaNumero || "" : "",  // Q  Numero portabilidad
+      m.portability === "yes" ? m.portaOperador || "" : "",// R  Operador
+      "",                                                  // S  Referral
+      m.phone || "",                                       // T  Numero cliente
     ];
 
     const formRow = await appendOrderToSheets(orderId, row);
