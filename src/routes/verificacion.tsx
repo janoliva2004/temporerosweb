@@ -1,13 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { checkVerification, startVerification } from "@/lib/didit";
-import { Loader2, CheckCircle2, RotateCcw, ShieldAlert } from "lucide-react";
+import { Loader2, CheckCircle2, RotateCcw, ShieldAlert, Clock } from "lucide-react";
 
 export const Route = createFileRoute("/verificacion")({
   component: Verificacion,
 });
 
-type UiState = "loading" | "approved" | "rejected" | "error";
+type UiState = "loading" | "approved" | "review" | "rejected" | "error";
 
 function Verificacion() {
   const [state, setState] = useState<UiState>("loading");
@@ -52,7 +52,14 @@ function Verificacion() {
         if (r.done) {
           // La sesión ya se consumió; limpiamos el id (dejamos formRow para reintentar).
           localStorage.removeItem("didit_session_id");
-          setState(r.status === "Approved" ? "approved" : "rejected");
+          // estado: APROBADO / COMPROBAR / RECHAZADO (o "" si abandonó/caducó).
+          setState(
+            r.estado === "APROBADO"
+              ? "approved"
+              : r.estado === "COMPROBAR"
+                ? "review"
+                : "rejected",
+          );
           return;
         }
       } catch (e) {
@@ -112,6 +119,25 @@ function Verificacion() {
             <h1 className="mt-5 font-display text-2xl font-bold">VERIFICACIÓN APROBADA</h1>
             <p className="mt-2 text-sm text-muted-foreground">
               Revisa tu correo para ver los detalles del pedido.
+            </p>
+            <div className="mt-6">
+              <Link
+                to="/"
+                className="inline-flex items-center justify-center rounded-full bg-[image:var(--gradient-brand)] px-6 py-2.5 text-sm font-semibold text-white shadow-[var(--shadow-brand)] hover:opacity-95"
+              >
+                Continuar
+              </Link>
+            </div>
+          </>
+        )}
+
+        {state === "review" && (
+          <>
+            <Clock className="mx-auto h-12 w-12 text-amber-500" />
+            <h1 className="mt-5 font-display text-2xl font-bold">VERIFICACIÓN EN REVISIÓN</h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Estamos revisando tu verificación manualmente. Te avisaremos por correo
+              en cuanto esté lista. No necesitas hacer nada más.
             </p>
             <div className="mt-6">
               <Link

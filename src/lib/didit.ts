@@ -27,7 +27,30 @@ import { usingSheets, writeValidacionToSheets } from "./sheets";
  */
 
 const VALIDACION_SHEET = "Validacion Didit";
-const TERMINAL_STATUSES = ["Approved", "Declined", "In Review", "Abandoned"];
+
+// Estado que se escribe en la columna B de "Validacion Didit". Por defecto la
+// fila nace "PENDIENTE" (lo pone el Apps Script al confirmarse el pago) y aquí
+// solo la modificamos cuando Didit da un veredicto real:
+//   Approved  -> APROBADO   (verificación superada; activa la línea)
+//   Declined  -> RECHAZADO  (no superó las comprobaciones)
+//   In Review -> COMPROBAR  (necesita revisión humana desde la web)
+// Cualquier otro estado (Abandoned/Expired/…) se deja en PENDIENTE: no se
+// escribe nada, no se activa y no se avisa.
+const ESTADO_BY_DIDIT: Record<string, "APROBADO" | "RECHAZADO" | "COMPROBAR"> = {
+  Approved: "APROBADO",
+  Declined: "RECHAZADO",
+  "In Review": "COMPROBAR",
+};
+// Estados de Didit en los que el proceso ha terminado (dejamos de sondear en la
+// web), aunque no todos generan un cambio de estado en la hoja.
+const TERMINAL_STATUSES = [
+  "Approved",
+  "Declined",
+  "In Review",
+  "Abandoned",
+  "Expired",
+  "Kyc Expired",
+];
 
 function diditBase(): string {
   return process.env.DIDIT_BASE_URL || "https://verification.didit.me";
@@ -120,6 +143,9 @@ export const checkVerification = createServerFn({ method: "POST" })
     const json = (await res.json()) as DecisionResponse;
     const status = json.status ?? json.decision?.status ?? "Unknown";
     const done = TERMINAL_STATUSES.includes(status);
+    // Estado final en español (APROBADO/RECHAZADO/COMPROBAR) o "" si Didit no dio
+    // un veredicto que deba cambiar la fila (se queda como PENDIENTE).
+    const estado = ESTADO_BY_DIDIT[status] ?? "";
 
     // Datos extraídos del documento (primer id_verification disponible).
     const idv =
@@ -132,11 +158,15 @@ export const checkVerification = createServerFn({ method: "POST" })
       country: idv.issuing_state ?? idv.issuing_country ?? "ES",
     };
 
-    if (done) {
-      // Columnas A..J de "Validacion Didit".
+    // Solo tocamos la hoja cuando hay un veredicto real (APROBADO/RECHAZADO/
+    // COMPROBAR). Abandonada/caducada → no escribimos: la fila sigue PENDIENTE.
+    if (estado) {
+      // Columnas A..J de "Validacion Didit". Col A (ID Stripe) va vacía a
+      // propósito: el Apps Script no sobrescribe celdas vacías, así que se
+      // conserva el ID Stripe que ya puso el pago. Col B lleva el estado final.
       const values: (string | number)[] = [
-        "",                          // A  ID Stripe (pendiente de conectar Stripe)
-        status,                      // B  Accion validar (resultado Didit)
+        "",                          // A  ID Stripe (ya escrito por el pago; no se pisa)
+        estado,                      // B  Accion validar (APROBADO/RECHAZADO/COMPROBAR)
         extracted.firstName,         // C  Nombre
         extracted.lastName,          // D  Apellido
         extracted.documentNumber,    // E  DNI
@@ -174,5 +204,5 @@ export const checkVerification = createServerFn({ method: "POST" })
       }
     }
 
-    return { status, done, ...extracted };
+    return { status, estado, done, ...extracted };
   });
